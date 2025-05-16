@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>点我呀！</title>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: linear-gradient(135deg, #ffe0f7 0%, #b5f0ff 100%);
+      --main-color: #ff69b4;
+      --btn-bg: #fff0f7;
+      --btn-border: #ffb6d5;
+      --footer-color: #ff69b4;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--main-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
+      overflow: hidden;
+      transition: background 0.5s;
+    }
+    .title {
+      font-size: 2.5rem;
+      color: var(--main-color);
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 8px #fff0f7;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    .cute-btn, .theme-btn, .mute-btn, .fortune-btn {
+      background: var(--btn-bg);
+      border: 2px solid var(--btn-border);
+      border-radius: 50px;
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      color: var(--main-color);
+      cursor: pointer;
+      box-shadow: 0 4px 16px #ffb6d5a0;
+      transition: transform 0.1s, box-shadow 0.1s, background 0.5s, color 0.5s;
+      outline: none;
+      margin: 0.5rem 0.5rem 1.5rem 0.5rem;
+      font-family: inherit;
+    }
+    .cute-btn:active, .theme-btn:active, .mute-btn:active, .fortune-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 8px #ffb6d5a0;
+    }
+    .bubble {
+      position: absolute;
+      pointer-events: none;
+      font-size: 2rem;
+      animation: floatUp 1.2s cubic-bezier(.4,1.6,.6,1) forwards, rotateBubble 1.2s linear;
+      opacity: 0.9;
+      z-index: 10;
+      user-select: none;
+      will-change: transform, opacity;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+    }
+    @keyframes rotateBubble {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      width: 100vw;
+      text-align: center;
+      color: var(--footer-color);
+      font-size: 1rem;
+      opacity: 0.7;
+      font-family: inherit;
+      pointer-events: none;
+    }
+    .decor-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      text-align: center;
+      z-index: 1;
+      font-size: 2.2rem;
+      opacity: 0.7;
+      pointer-events: none;
+      user-select: none;
+    }
+    .fortune-box {
+      margin: 1rem 0 0.5rem 0;
+      padding: 0.8rem 1.2rem;
+      background: #fff8fcbb;
+      border-radius: 20px;
+      color: #ff69b4;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 8px #ffb6d5a0;
+      min-height: 2.2rem;
+      display: inline-block;
+      text-align: center;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="decor-top">🌸✨🦄💖🎀🍓🌈</div>
+  <div class="title">点我呀！给你小惊喜~</div>
+  <div>
+    <button class="cute-btn" id="mainBtn">点这里</button>
+    <button class="fortune-btn" id="fortuneBtn">今日运势</button>
+    <button class="theme-btn" id="themeBtn">切换主题</button>
+    <button class="mute-btn" id="muteBtn">🔊音效</button>
+  </div>
+  <div class="fortune-box" id="fortuneBox"></div>
+  <div class="footer">Designed with ❤️ for你的小可爱</div>
+  <audio id="bubbleSound" src="Schnappi.mp3" preload="auto"></audio>
+  <script>
+    // 可爱内容
+    const cuteTexts = [
+      "你笑起来真好看~",
+      "今天也要开心哦！",
+      "比心💖",
+      "摸摸头~",
+      "你是小仙女吗？✨",
+      "给你小心心~",
+      "哇，你好可爱！",
+      "抱抱你~",
+      "嘿嘿，被你发现啦~",
+      "你点我一下，我就开心一天！",
+      "你的小可爱已上线~",
+      "你是我见过最可爱的人！",
+      "你开心我就开心~",
+      "你是我的小幸运~",
+      "偷偷告诉你，我喜欢你哦~",
+      "你是我的小太阳~",
+      "你一笑，世界都亮了~",
+      "你是我的快乐源泉~",
+      "你比奶茶还甜！",
+      "你是我心中的小星星✨"
+    ];
+    // 土味情话
+    const loveTexts = [
+      "你知道你和星星有什么区别吗？星星在天上，你在我心里~",
+      "我最近有点忙，忙着喜欢你~",
+      "你闻到烧焦的味道了吗？那是我的心在为你燃烧~",
+      "你会弹吉他吗？为什么拨动了我的心弦~",
+      "你是不是魔术师？不然为什么我一看到你就开心~",
+      "你累不累？你在我心里跑了一天~",
+      "你知道我最喜欢什么吗？现在的你~",
+      "你是风儿我是沙，你是牙膏我是刷~",
+      "你是年少的欢喜，也是余生的甜蜜~"
+    ];
+    // 夸夸语录
+    const praiseTexts = [
+      "你真的很棒！",
+      "你是最闪亮的那颗星！",
+      "你做什么都很厉害！",
+      "你是最特别的存在~",
+      "你值得拥有一切美好！",
+      "你笑起来比阳光还灿烂~",
+      "你是最温柔的小可爱~",
+      "你是我的骄傲！"
+    ];
+    const cuteEmojis = [
+      "🐰", "🐱", "🌸", "💖", "✨", "🥰", "😻", "🍬", "🎀", "🦄", "🍓", "🌈", "🧸", "🍑", "🍭", "🫧", "🦋", "🍀", "🌼"
+    ];
+    // 今日运势
+    const fortunes = [
+      "今日桃花运爆棚，遇见喜欢的人要勇敢说出来哦~",
+      "今天适合吃甜品，心情会变得超好！",
+      "好运正在靠近你，记得保持微笑~",
+      "今天的你超级幸运，做什么都顺利！",
+      "今天适合表白，成功率up up！",
+      "今天适合和喜欢的人聊天哦~",
+      "今天的你魅力值爆表！",
+      "今天适合发呆，灵感会突然降临~",
+      "今天适合自拍，颜值巅峰！",
+      "今天适合许愿，愿望会实现哦~"
+    ];
+    // 主题
+    const themes = [
+      {
+        name: "粉萌",
+        bg: "linear-gradient(135deg, #ffe0f7 0%, #b5f0ff 100%)",
+        color: "#ff69b4",
+        btnBg: "#fff0f7",
+        btnBorder: "#ffb6d5",
+        footer: "#ff69b4"
+      },
+      {
+        name: "蓝调",
+        bg: "linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%)",
+        color: "#3a8dde",
+        btnBg: "#e3f0ff",
+        btnBorder: "#a1c4fd",
+        footer: "#3a8dde"
+      },
+      {
+        name: "彩虹",
+        bg: "linear-gradient(120deg, #f6d365 0%, #fda085 30%, #fbc2eb 60%, #a1c4fd 100%)",
+        color: "#ff7eb3",
+        btnBg: "#fff0f7",
+        btnBorder: "#fbc2eb",
+        footer: "#ff7eb3"
+      }
+    ];
+    let themeIndex = 0;
+    function setTheme(idx) {
+      const t = themes[idx];
+      document.documentElement.style.setProperty('--main-bg', t.bg);
+      document.documentElement.style.setProperty('--main-color', t.color);
+      document.documentElement.style.setProperty('--btn-bg', t.btnBg);
+      document.documentElement.style.setProperty('--btn-border', t.btnBorder);
+      document.documentElement.style.setProperty('--footer-color', t.footer);
+      document.getElementById('themeBtn').innerText = `切换主题(${t.name})`;
+    }
+    setTheme(themeIndex);
+    // 音效
+    let mute = false;
+    const bubbleSound = document.getElementById('bubbleSound');
+    document.getElementById('muteBtn').onclick = function() {
+      mute = !mute;
+      this.innerText = mute ? '🔇静音' : '🔊音效';
+    };
+    // 随机内容
+    function randomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+    // 随机类型内容
+    function getRandomCuteContent() {
+      const r = Math.random();
+      if (r < 0.4) return randomItem(cuteTexts);
+      if (r < 0.6) return randomItem(loveTexts);
+      if (r < 0.8) return randomItem(praiseTexts);
+      return randomItem(cuteEmojis);
+    }
+    // 气泡动画
+    function createBubble(x, y) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerText = getRandomCuteContent();
+      bubble.style.left = (x - 30 + Math.random() * 60) + 'px';
+      bubble.style.top = (y - 20 + Math.random() * 40) + 'px';
+      bubble.style.color = `hsl(${Math.random()*360}, 80%, 65%)`;
+      bubble.style.transform += ` scale(${0.9 + Math.random()*0.4}) rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(bubble);
+      if (!mute) {
+        bubbleSound.currentTime = 0;
+        bubbleSound.play();
+      }
+      setTimeout(() => {
+        bubble.remove();
+      }, 1200);
+    }
+    document.getElementById('mainBtn').addEventListener('click', function(e) {
+      const rect = e.target.getBoundingClientRect();
+      const x = rect.left + rect.width/2;
+      const y = rect.top;
+      createBubble(x, y);
+    });
+    document.body.addEventListener('click', function(e) {
+      if(e.target.className && e.target.className.indexOf('btn') === -1) {
+        createBubble(e.clientX, e.clientY);
+      }
+    });
+    // 切换主题
+    document.getElementById('themeBtn').onclick = function() {
+      themeIndex = (themeIndex + 1) % themes.length;
+      setTheme(themeIndex);
+    };
+    // 今日运势
+    document.getElementById('fortuneBtn').onclick = function() {
+      const fortune = randomItem(fortunes);
+      document.getElementById('fortuneBox').innerText = fortune;
+      createBubble(window.innerWidth/2, 120 + Math.random()*40);
+    };
+    // 初始清空运势
+    document.getElementById('fortuneBox').innerText = '';
+  </script>
+</body>
+</html>
